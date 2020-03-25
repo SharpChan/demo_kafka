@@ -20,6 +20,11 @@ import java.util.Set;
 public class CreateExcelService implements CreateExcelIntf {
     private static final Logger logger = LogManager.getLogger(CreateExcelService.class);
 
+    /**
+     * 获取结构化对象
+     * @param rowEntityList
+     * @return
+     */
     public List<ProjectEntity> formatConverter(List<RowEntity> rowEntityList){
         if(CollectionUtils.isEmpty(rowEntityList)){
             logger.info("需要导出的表格为空");
@@ -44,7 +49,6 @@ public class CreateExcelService implements CreateExcelIntf {
          }
 
          for(String personName : personNameSet ){
-
              PersonEntity personEntity = new PersonEntity();
              personEntity.setName(personName);
              List<WorkHoursEntity> workHoursEntityList = new ArrayList<WorkHoursEntity>();
@@ -57,9 +61,7 @@ public class CreateExcelService implements CreateExcelIntf {
                    workHoursEntityList.add(workHoursEntity);
                }
             }
-
             personEntityList.add(personEntity);
-
          }
      }
       return projectEntityList;
