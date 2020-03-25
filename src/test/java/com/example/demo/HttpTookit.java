@@ -1,24 +1,20 @@
 package com.example.demo;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import com.example.demo.entity.RowEntity;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,148 +71,158 @@ public class HttpTookit {
         return result;
     }
 
-    /**
-     * 2003 excel后缀
-     */
-    private static final String EXCEL_XLS = "xls";
 
-    /**
-     * 2007 及以上版本excel后缀
-     */
-    private static final String EXCEL_XLSX = "xlsx";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         System.out.println("开始时间为：" + System.currentTimeMillis());
-        //String s = HttpTookit.sendGet("http://10.10.10.151/zentao/company-calendar-0-1584374400-1584979200-0-0--1-yes.html");
-
-        sendPost("http://10.10.10.151/zentao/effort-export--date_asc.html");
-
-        //System.out.println("输出：" + s);
+        //String table = parseTable();
+        String s = sendPost("http://10.10.10.151/zentao/company-effort-custom-date_desc.html");
+        List<RowEntity> rowEntityList = parseTable(s);
+        System.out.println("输出：" + rowEntityList);
 
     }
 
-    public static void sendPost(String url) {
-        HttpClient httpclient = HttpClients.createDefault();
+    private static List<RowEntity> parseTable(String table) {
+        Document doc = Jsoup.parse(table);
+        Elements rows = doc.select("table[class=table has-sort-head table-fixed ]").get(0).select("tr");
+        List<RowEntity> rowEntityList = new ArrayList<RowEntity>();
+        if (rows.size() == 1) {
+            System.out.println("没有结果");
+        }else {
+            for(int i=1;i<rows.size();i++)
+            {
+                Element row = rows.get(i);
+                    RowEntity rowBean =new RowEntity();
+                    rowBean.setId(row.select("td").get(0).text());
+                    rowBean.setDate(row.select("td").get(1).text());
+                    rowBean.setPersonName(row.select("td").get(2).text());
+                    rowBean.setJobDescription(row.select("td").get(3).text());
+                    rowBean.setElapsedTime(row.select("td").get(4).text());
+                    rowBean.setRemainingTime(row.select("td").get(5).text());
+                    rowBean.setMission(row.select("td").get(6).text());
+                    rowBean.setProduct(row.select("td").get(7).text());
+                    rowBean.setProjectName(row.select("td").get(8).text());
+                rowEntityList.add(rowBean);
+            }
+        }
+        return rowEntityList;
+    }
+
+
+    public static String sendPost(String url) throws Exception{
+        URL urls = null;
         BufferedReader in = null;
+        HashMap<String,String> parameter = new HashMap<String,String>();
+        /*
+        parameter.put("fileName","chengfeng - 日志");
+        parameter.put("fileType","xlsx");
+        parameter.put("exportType","all");
+        parameter.put("template","0");
+        parameter.put("exportFields_01","id");
+        parameter.put("exportFields_02","date");
+        parameter.put("exportFields_03","account");
+        parameter.put("exportFields_04","work");
+        parameter.put("exportFields_05","consumed");
+        parameter.put("exportFields_06","left");
+        parameter.put("exportFields_07","objectType");
+        parameter.put("exportFields_08","product");
+        parameter.put("exportFields_09","project");
+        parameter.put("title","默认模板");
+        */
+        parameter.put("dept","0");
+        parameter.put("begin","2020-01-24");
+        parameter.put("end","2020-03-24");
+        parameter.put("product","0");
+        parameter.put("project","0");
+        parameter.put("user","");
+
+
+
         try {
-            String uri = url;
-            HttpPost httppost = new HttpPost(uri);
-
-
-            StringBody fileName = new StringBody("chengfeng - 日志", ContentType.TEXT_PLAIN);
-            StringBody fileType = new StringBody("xlsx", ContentType.TEXT_PLAIN);
-            StringBody exportType = new StringBody("exportType", ContentType.TEXT_PLAIN);
-            StringBody template = new StringBody("template", ContentType.TEXT_PLAIN);
-            StringBody exportField_01 = new StringBody("account", ContentType.TEXT_PLAIN);
-            StringBody exportField_02 = new StringBody("consumed", ContentType.TEXT_PLAIN);
-            StringBody exportField_03 = new StringBody("project", ContentType.TEXT_PLAIN);
-            StringBody title = new StringBody("ggggg", ContentType.TEXT_PLAIN);
-
-            HttpEntity reqEntity = MultipartEntityBuilder.create()
-                    // .addPart("bin", bin)
-                    //  .addPart("comment", comment)
-                    .addPart("fileName",fileName)
-                    .addPart("fileType",fileType)
-                    .addPart("exportType",exportType)
-                    .addPart("template",template)
-                    .addPart("exportFields[]",exportField_01)
-                    .addPart("exportFields[]",exportField_02)
-                    .addPart("exportFields[]",exportField_03)
-                    .addPart("title",title)
-                    .build();
-
-
-            httppost.setEntity(reqEntity);
-            System.out.println("executing request " + httppost.getRequestLine());
-
-
-
-            HttpResponse response = httpclient.execute(httppost);
-            try {
-                System.out.println("----------------------------------------");
-                System.out.println("状态"+response.getStatusLine());
-                HttpEntity resEntity = response.getEntity();
-
-                if (resEntity != null) {
-                    System.out.println("Response content length: " + resEntity.getContentLength());
-                    System.out.println("Response content LazyDecompressingInputStream: " + resEntity.getContent());
-
-                    /*
-                    String a= EntityUtils.toString(resEntity);
-                    //打印获取到的返回值
-                    System.out.println("Response content: " + a);
-                    */
-
-                    byte[] data = EntityUtils.toByteArray(resEntity);
-                    //存入磁盘
-                    FileOutputStream fos = new FileOutputStream("E:/text/sharecertificate.xlsx");
-                    fos.write(data);
-                    fos.close();
-
-                    System.out.println("sharecertificate.xls文件下载成功!!!!");
-                }
-                EntityUtils.consume(resEntity);
-            } finally {
-                try {
-                   // response.close();
-                }catch(Exception e){
-                    e.printStackTrace();
-
-                }
-            }
-        }catch(Exception e){
+            urls = new URL(url);
+        } catch (MalformedURLException e) {
             e.printStackTrace();
-        } finally {
-            try {
-               // httpclient.close();
-            }catch(Exception e){
-                e.printStackTrace();
+        }
+        HttpURLConnection connection = null;
+        OutputStream outputStream = null;
+        String rs = null;
+        try {
+            connection = (HttpURLConnection) urls.openConnection();
+
+            connection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+
+            connection.setRequestProperty("Accept-Encoding", "deflate");
+            connection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9");
+            connection.setRequestProperty("Cache-Control", "max-age=0");
+            connection.setRequestProperty("Content-Length", "355");
+            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=--testsssssss");
+            connection.setRequestProperty("Cookie", "lang=zh-cn; device=desktop; theme=default; feedbackView=0; keepLogin=on; " +
+                                                     "za=chengfeng; lastProduct=51; lastProject=52; from=doc; zp=56d219691d2280e73f2ce25e2c21f2d3ca368fc9; " +
+                                                     "checkedItem=; downloading=1; pagerCompanyEffort=20; downloading=null; windowHeight=789; windowWidth=681; zentaosid=drpmj7hmcbs2atrqe7u7abafk7");
+            connection.setRequestProperty("Host", "10.10.10.151");
+            connection.setRequestProperty("Origin", "http://10.10.10.151");
+            connection.setRequestProperty("Proxy-Connection", "keep-alive");
+            connection.setRequestProperty("Referer", "http://10.10.10.151/zentao/company-effort-custom-date_desc.html");
+            connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36");
+
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+
+            connection.setRequestProperty("Range", "bytes="+"");
+            connection.setConnectTimeout(8000);
+            connection.setReadTimeout(20000);
+            connection.setRequestMethod("POST");
+
+            StringBuffer sb = new StringBuffer();
+            String mimeBoundary = "testsssssss";
+            for(String key:parameter.keySet()) {
+                //在boundary关需添加两个横线
+                sb = sb.append("--").append(mimeBoundary);
+                sb.append("\r\n");
+                String keyFin = "";
+                if(key.contains("exportFields")){
+                    keyFin = "exportFields[]";
+                }else{
+                    keyFin = key;
+                }
+                sb.append("Content-Disposition: form-data; "+keyFin+"=\""+parameter.get(key)+"\"");
+                //提交的数据前要有两个回车换行
+                sb.append("\r\n\r\n");
             }
+            //body结束时 boundary前后各需添加两上横线，最添加添回车换行
+            sb.append("--").append(mimeBoundary).append("--").append("\r\n");
+            outputStream = connection.getOutputStream();
+            System.out.println(sb.toString());
+            outputStream.write(sb.toString().getBytes());
+            try {
+                connection.connect();
+                if(connection.getResponseCode() == 200) {
+                    in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        rs += line;
+                    }
+                }
+            }
+            catch (Exception e) {
+                rs = null;
+            }
+
+            return rs;
+        }
+        finally {
+            try {
+                outputStream.close();
+            }
+            catch (Exception e) {
+            }
+            outputStream = null;
+
+            if(connection != null)
+                connection.disconnect();
+            connection = null;
         }
     }
 
-    public static String downloadFile(HttpServletResponse response) {
-        OutputStream out = null;
-        try {
-            // 获取输入流
-            File file = new File("E:\\123.txt");
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-            // 保持文件名
-            String fileName = file.getName();
-            // 防止中文名乱码
-            fileName = URLEncoder.encode(fileName, "UTF-8");
-            // 设置文件下载头
-            response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
-            // 设置文件ContentType类型
-            response.setContentType("multipart/form-data");
-            out = new BufferedOutputStream(response.getOutputStream());
-            String suffix = StringUtils.substringAfterLast(fileName, ".");
-            if ((suffix.equals(EXCEL_XLS) || suffix.equals(EXCEL_XLSX))) {
-                Workbook workbook = WorkbookFactory.create(new FileInputStream(file));
-                workbook.write(out);
-                workbook.close();
-            } else {
-                byte[] buff = new byte[10 * 1024];
-                while (in.read(buff) != -1) {
-                    out.write(buff);
-                    //清空缓存区中的数据流
-                    out.flush();
-                }
-            }
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InvalidFormatException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return "SUCCESS";
-    }
 }
