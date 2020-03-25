@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.entity.CookieEntity;
+import com.example.demo.entity.ProjectEntity;
 import com.example.demo.entity.RowEntity;
 import com.example.demo.intf.CreateExcelIntf;
 import com.example.demo.intf.HttpTookitIntf;
@@ -48,7 +49,8 @@ class DemoApplicationTests {
 		List<RowEntity> rowEntityList = tableParseServer.parseTable(tableStr);
 		System.out.println("输出rowEntityList：" + rowEntityList);
 
-		createExcelService.formatConverter(rowEntityList);
+		List<ProjectEntity> ProjectEntityList = createExcelService.formatConverter(rowEntityList);
+		System.out.println(ProjectEntityList);
 	}
 
 }
