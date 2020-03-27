@@ -41,26 +41,32 @@ public class CreateExcelService implements CreateExcelIntf {
          projectEntity.setPersonEntityList(personEntityList);
          Set<String> personNameSet = new HashSet();//该项目下的人员
          List<RowEntity> rowList = new ArrayList<RowEntity>();//该项目下的条目
+         BigDecimal projectHour = new BigDecimal(0);
          for (RowEntity row : rowEntityList) {
              if(projectName.equals(row.getProjectName())){
                  personNameSet.add(row.getPersonName());
                  rowList.add(row);
+                 projectHour = projectHour.add(new BigDecimal(row.getElapsedTime()));
              }
          }
+         projectEntity.setProjectTotalHour(projectHour);
 
          for(String personName : personNameSet ){
              PersonEntity personEntity = new PersonEntity();
              personEntity.setName(personName);
              List<WorkHoursEntity> workHoursEntityList = new ArrayList<WorkHoursEntity>();
              personEntity.setWorkHoursEntityList(workHoursEntityList);
+             BigDecimal personHour = new BigDecimal(0);
             for(RowEntity row : rowList){
                if(personName.equals(row.getPersonName())){
                    WorkHoursEntity workHoursEntity = new WorkHoursEntity();
                    workHoursEntity.setManHour(new BigDecimal(row.getElapsedTime()) );
                    workHoursEntity.setWorkDate(row.getDate());
                    workHoursEntityList.add(workHoursEntity);
+                   personHour = personHour.add(workHoursEntity.getManHour());
                }
             }
+            personEntity.setPersonHour(personHour);
             personEntityList.add(personEntity);
          }
      }

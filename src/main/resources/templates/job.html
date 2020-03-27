@@ -3,13 +3,15 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
     <link rel="stylesheet" type="text/css" href="css/wui.min.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/angular.min.js"></script>
     <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 </head>
-<body>
+<body style="width:1000px; margin:0 auto;">
 
     <div ng-app="myApp" ng-controller="myCtrl">
         <form>
@@ -18,10 +20,11 @@
                 <tr>
                     <td width="200px">
                         <div  class="form-group">
-                            <span>部门: <input class="form-control" type="text" ng-model="memberNo" ></span>
+                            <h4 class="h4">选择部门</h4>
+                            <select style="height: 25px;width: 180px;margin:-5px;" ng-init="selectedDepartmentNo = '0'"  ng-model="selectedDepartmentNo"  ng-options="x for (x,y) in departmentIds"></select>
                         </div>
 
-                        <div class="wui-area">
+                        <div class="wui-area  form-group">
                             <h4 class="h4">选择开始时间</h4>
                             <wui-date
                                     format="yyyy-mm-dd"
@@ -33,14 +36,14 @@
                             </wui-date>
                         </div>
 
-                        <div class="wui-area">
+                        <div class="wui-area  form-group">
                             <h4 class="h4">选择结束时间</h4>
                             <wui-date
                                     format="yyyy-mm-dd"
                                     placeholder="请选择或输入日期"
                                     id="date1"
                                     btns="{'ok':'确定','now':'此刻'}"
-                                    ng-model="dateStart"
+                                    ng-model="dateEnd"
                             >
                             </wui-date>
                         </div>
@@ -56,7 +59,7 @@
                                 <button type="button" class="btn btn-link"></button>
                             </div>
                             <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-primary" ng-click="doSearch()">查询</button>
+                                <button id="button" type="button" class="btn btn-primary" ng-click="req_workInfo()">查询</button>
                             </div>
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-link"></button>
@@ -70,19 +73,46 @@
                 </tbody>
             </table>
 
-
-
-
-            <!--隐藏域 -->
-            <input  id="memberNo_hid" name="memberNo" hidden="true" value="${memberNo}">
-            <input  id="userCartId_hid" name="userCartId" hidden="true" value="${userCartId}">
-            <input  id="cart2Num_hid" name="cart2Num" hidden="true" value="${cart2Num}">
-            <!-- 正在选中车一还是车二 -->
-            <input  id="cartFr" name="cart" hidden="true" value="${cart}" >
-            <label  id="cartAg" hidden="true"  ng-model="cart" ></label>
+            <!--隐藏域
+            <label  id="" hidden="true"  ng-model="" ></label>-->
 
         </form>
 
+        <div id="commodity" class="panel panel-primary">
+            <div class="panel-heading">
+                项目信息
+
+                <div style="float:right;padding-right:4px;">
+                <button type="button" class="btn btn-default btn-sm" ng-click="exportToExcel('#table1')">
+                    <span class="glyphicon glyphicon-share"></span> 导出EXCEL
+                </button>
+                </div>
+
+                <div id="pleaseWait" hidden="true" style="float:right;padding-right:4px;">
+                    <img alt="" src="data:image/gif;base64,R0lGODlhGQAZAJECAK7PTQBjpv///wAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDE0IDc5LjE1MTQ4MSwgMjAxMy8wMy8xMy0xMjowOToxNSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo5OTYyNTQ4Ni02ZGVkLTI2NDUtODEwMy1kN2M4ODE4OWMxMTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RUNGNUFGRUFGREFCMTFFM0FCNzVDRjQ1QzI4QjFBNjgiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RUNGNUFGRTlGREFCMTFFM0FCNzVDRjQ1QzI4QjFBNjgiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjk5NjI1NDg2LTZkZWQtMjY0NS04MTAzLWQ3Yzg4MTg5YzExNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5OTYyNTQ4Ni02ZGVkLTI2NDUtODEwMy1kN2M4ODE4OWMxMTQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4B//79/Pv6+fj39vX08/Lx8O/u7ezr6uno5+bl5OPi4eDf3t3c29rZ2NfW1dTT0tHQz87NzMvKycjHxsXEw8LBwL++vby7urm4t7a1tLOysbCvrq2sq6qpqKempaSjoqGgn56dnJuamZiXlpWUk5KRkI+OjYyLiomIh4aFhIOCgYB/fn18e3p5eHd2dXRzcnFwb25tbGtqaWhnZmVkY2JhYF9eXVxbWllYV1ZVVFNSUVBPTk1MS0pJSEdGRURDQkFAPz49PDs6OTg3NjU0MzIxMC8uLSwrKikoJyYlJCMiISAfHh0cGxoZGBcWFRQTEhEQDw4NDAsKCQgHBgUEAwIBAAAh+QQFCgACACwAAAAAGQAZAAACTpSPqcu9AKMUodqLpAb0+rxFnWeBIUdixwmNqRm6JLzJ38raqsGiaUXT6EqO4uIHRAYQyiHw0GxCkc7l9FdlUqWGKPX64mbFXqzxjDYWAAAh+QQFCgACACwCAAIAFQAKAAACHYyPAsuNH1SbME1ajbwra854Edh5GyeeV0oCLFkAACH5BAUKAAIALA0AAgAKABUAAAIUjI+py+0PYxO0WoCz3rz7D4bi+BUAIfkEBQoAAgAsAgANABUACgAAAh2EjxLLjQ9UmzBNWo28K2vOeBHYeRsnnldKBixZAAA7" />
+                </div>
+            </div>
+            <div class="panel-body">
+                <table id="table1" class="table table-striped" cellpadding="0" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width:180px;">项目名称 </th>
+                            <th style="width:180px;">人员 </th>
+                            <th style="width:180px;">人员耗时 </th>
+                            <th style="width:180px;">项目耗时 </th>
+                        </tr>
+                    </thead>
+                    <tbody ng-repeat="x in projectEntityList">
+                    　　　　<tr ng-repeat="y in x.personEntityList">
+                        　　　　　　<td ng-if="$index === 0" rowspan={{x.personEntityList.length}}>{{x.projectName}}</td>
+                        　　　　　　<td>{{y.name}}</td>
+                        　　　　　　<td>{{y.personHour}}</td>
+                                    <td ng-if="$index === 0" rowspan={{x.personEntityList.length}}>{{x.projectTotalHour}}</td>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel-footer">面板脚注</div>
+        </div>
     </div>
 
 </body>
@@ -90,19 +120,60 @@
 
 <script>
     var app = angular.module('myApp', []);
-    app.controller('myCtrl', function($scope, $http) {
-        $scope.formData = {};
-        $scope.submitForm = function() {
-            var url="http://localhost:8080/getExcel";
-            $http.get(url).then( function(response) {
-                $scope.projectList = response;
-            }).catch(function (result) {
-                alert(result);
+    app.constant("getExcel_url","/getExcel");
 
-            });
-
-
+    app.factory('Excel',function($window){
+        var uri='data:application/vnd.ms-excel;base64,',
+            template='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+            base64=function(s){return $window.btoa(unescape(encodeURIComponent(s)));},
+            format=function(s,c){return s.replace(/{(\w+)}/g,function(m,p){return c[p];})};
+        return {
+            tableToExcel:function(tableId,worksheetName){
+                var table=$(tableId),
+                    ctx={worksheet:worksheetName,table:table.html()},
+                    href=uri+base64(format(template,ctx));
+                return href;
+            }
         };
+    });
+
+    app.controller('myCtrl', function($scope, $http,getExcel_url,Excel,$timeout) {
+        $scope.departmentIds = {
+            所有 : "0",
+            开发保障部 : "2",
+            大数据研发部 : "4",
+            方舟产部 : "8",
+            警务产品 : "10",
+            智慧城市 : "11",
+            UI设计部 : "12",
+            测试部: "13",
+            项目管理部: "14",
+            技术开发服务部: "15"
+        };
+
+        $scope.req_workInfo=function(){
+            $("#pleaseWait").show();
+            $('button').prop('disabled', true);
+            var postData = "?dateStart="+$scope.dateStart+"&"+"dateEnd="+$scope.dateEnd+"&"+"departmentNo="+$scope.selectedDepartmentNo;
+            var url = getExcel_url+postData;
+            $http.post(url).then(function(data)
+            {
+                var jsonString = angular.toJson(data);
+                $scope.projectEntityList = angular.fromJson(jsonString).data;
+                $("#pleaseWait").hide();
+                $('button').prop('disabled', false);
+            }).catch(function(data)
+            {
+                alert("查询车头信息，发送请求失败，请查看网络是否正常！"+ data);
+            });
+        }
+
+        $scope.exportToExcel=function(tableId){ // ex: '#my-table'
+            $scope.exportHref=Excel.tableToExcel(tableId,'项目');
+            $timeout(function(){location.href=$scope.exportHref;},10000); // trigger download
+
+        }
+
     });
 
     app.directive('wuiDate', function() {

@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -12,10 +13,15 @@ public class ProjectEntity {
     /**
      * 项目名称
      */
-    public String projectName;
+    private String projectName;
+
+    /**
+     * 项目耗时
+     */
+    private BigDecimal projectTotalHour;
 
     /**
      * 做这个项目的人员列表
      */
-    public List<PersonEntity> personEntityList;
+    private List<PersonEntity> personEntityList;
 }

@@ -2,6 +2,8 @@ package com.example.demo.server;
 
 import com.example.demo.entity.RowEntity;
 import com.example.demo.intf.TableParseIntf;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,8 +15,11 @@ import java.util.List;
 
 @Service
 public class TableParseServer implements TableParseIntf {
-
+    private static final Logger logger = LogManager.getLogger(TableParseServer.class);
     public List<RowEntity> parseTable(String table) {
+        if(!table.contains("table[class=table has-sort-head table-fixed ]")){
+            logger.info("登录出现问题！");
+        }
         Document doc = Jsoup.parse(table);
         Elements rows = doc.select("table[class=table has-sort-head table-fixed ]").get(0).select("tr");
         List<RowEntity> rowEntityList = new ArrayList<RowEntity>();

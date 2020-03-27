@@ -30,7 +30,7 @@ class DemoApplicationTests {
 		CookieEntity cookieEntity = new CookieEntity();
 		cookieEntity.setZa("za=chengfeng;");
 		cookieEntity.setZentaosid("zentaosid=rnrj3ijo8laivd3tikntc01gv7");
-		String tableStr = httpTookitService.sendPost("http://10.10.10.151/zentao/company-effort-custom-date_desc.html",cookieEntity.toString());
+		String tableStr = httpTookitService.sendPost("http://10.10.10.151/zentao/company-effort-custom-date_desc.html",cookieEntity.toString(),"","","");
 		List<RowEntity> rowEntityList = tableParseServer.parseTable(tableStr);
 		System.out.println("输出rowEntityList：" + rowEntityList);
 	}
@@ -45,7 +45,7 @@ class DemoApplicationTests {
 		CookieEntity cookieEntity = new CookieEntity();
 		cookieEntity.setZa("za=chengfeng;");
 		cookieEntity.setZentaosid(arr[0]);
-		String tableStr = httpTookitService.sendPost("http://10.10.10.151/zentao/company-effort-custom-date_desc.html",cookieEntity.toString());
+		String tableStr = httpTookitService.sendPost("http://10.10.10.151/zentao/company-effort-custom-date_desc.html",cookieEntity.toString(),"","","");
 		List<RowEntity> rowEntityList = tableParseServer.parseTable(tableStr);
 		System.out.println("输出rowEntityList：" + rowEntityList);
 

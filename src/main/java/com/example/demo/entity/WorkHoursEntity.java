@@ -8,11 +8,11 @@ public class WorkHoursEntity {
     /**
      * 记录的日期
      */
-    public String  workDate;
+    private String  workDate;
 
     /**
      * 这天工作的时长
      */
 
-    public BigDecimal manHour;
+    private BigDecimal manHour;
 }

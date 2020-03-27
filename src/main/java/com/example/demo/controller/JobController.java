@@ -10,6 +10,7 @@ import com.example.demo.intf.TableParseIntf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-public class HelloWordController {
+public class JobController {
 
     @Autowired
     private TableParseIntf tableParseServer;
@@ -36,16 +37,19 @@ public class HelloWordController {
 
 
     @RequestMapping("/getExcel")
-    public  List<ProjectEntity> getExcel(){
+    public  List<ProjectEntity> getExcel(@RequestParam(value = "dateStart")String dateStart,@RequestParam(value = "dateEnd") String dateEnd,@RequestParam(value = "departmentNo") String departmentNo){
+        System.out.println("dateStart:"+dateStart);
+        System.out.println("dateEnd:"+dateEnd);
+        System.out.println("departmentNo:"+departmentNo);
         List<String> list =new ArrayList<String>();
-        String s = httpTookitService.logInGetCookie("chengfeng","12345678",list);
+        httpTookitService.logInGetCookie("chengfeng","12345678",list);
         String  aaa = list.get(list.size()-1);
         String[] arr = aaa.split(";");
 
         CookieEntity cookieEntity = new CookieEntity();
         cookieEntity.setZa("za=chengfeng;");
         cookieEntity.setZentaosid(arr[0]);
-        String tableStr = httpTookitService.sendPost("http://10.10.10.151/zentao/company-effort-custom-date_desc.html",cookieEntity.toString());
+        String tableStr = httpTookitService.sendPost("http://10.10.10.151/zentao/company-effort-custom-date_desc.html",cookieEntity.toString(),departmentNo,dateStart,dateEnd);
         List<RowEntity> rowEntityList = tableParseServer.parseTable(tableStr);
 
         List<ProjectEntity> projectEntityList = createExcelService.formatConverter(rowEntityList);
@@ -56,10 +60,11 @@ public class HelloWordController {
     }
 
 
-    @GetMapping("/test.html")
+    @GetMapping("/job.html")
     public ModelAndView test(){
         ModelAndView view = new ModelAndView();
-        view.setViewName("/test");
+        view.setViewName("/job");
         return view;
     }
+
 }

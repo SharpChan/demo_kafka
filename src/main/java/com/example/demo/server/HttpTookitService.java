@@ -66,14 +66,14 @@ public class HttpTookitService implements HttpTookitIntf {
         return result;
     }
 
-    public String sendPost(String url,String cookie) {
+    public String sendPost(String url,String cookie,String departmentNo,String dateStart,String dateEnd) {
         URL urls = null;
         BufferedReader in = null;
 
         HashMap<String,String> parameter = new HashMap<String,String>();
-        parameter.put("dept","0");
-        parameter.put("begin","2020-01-24");
-        parameter.put("end","2020-03-24");
+        parameter.put("dept",departmentNo);
+        parameter.put("begin",dateStart);
+        parameter.put("end",dateEnd);
         parameter.put("product","0");
         parameter.put("project","0");
         parameter.put("user","");
@@ -90,11 +90,13 @@ public class HttpTookitService implements HttpTookitIntf {
             connection = (HttpURLConnection) urls.openConnection();
             //设置请求头信息
             setConnectionParms(connection,cookie);
-            StringBuffer sb = new StringBuffer();
             //获取请求的FormData
-            sb = getFormDataStringBuffer(parameter, sb);
+            String str = getFormDataStringBuffer(parameter);
+            System.out.println("str:"+str);
             outputStream = connection.getOutputStream();
-            outputStream.write(sb.toString().getBytes());
+            outputStream.write(str.getBytes());
+            outputStream.flush();
+            outputStream.close();
             try {
                 connection.connect();
                 if(connection.getResponseCode() == 200) {
@@ -126,25 +128,13 @@ public class HttpTookitService implements HttpTookitIntf {
         return rs;
     }
 
-    private StringBuffer getFormDataStringBuffer(HashMap<String, String> parameter, StringBuffer sb) {
-        String mimeBoundary = "testsssssss";
+    private String getFormDataStringBuffer(HashMap<String, String> parameter) {
+        String str = "";
         for(String key:parameter.keySet()) {
-            //在boundary关需添加两个横线
-            sb = sb.append("--").append(mimeBoundary);
-            sb.append("\r\n");
-            String keyFin = "";
-            if(key.contains("exportFields")){
-                keyFin = "exportFields[]";
-            }else{
-                keyFin = key;
-            }
-            sb.append("Content-Disposition: form-data; "+keyFin+"=\""+parameter.get(key)+"\"");
-            //提交的数据前要有两个回车换行
-            sb.append("\r\n\r\n");
+            str += "&"+key+"="+parameter.get(key);
         }
-        //body结束时 boundary前后各需添加两上横线，最添加添回车换行
-        sb.append("--").append(mimeBoundary).append("--").append("\r\n");
-        return sb;
+        str = str.substring(1,str.length());
+        return str;
     }
 
     private void setConnectionParms(HttpURLConnection connection,String cookie) throws ProtocolException {
@@ -154,7 +144,7 @@ public class HttpTookitService implements HttpTookitIntf {
         connection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9");
         connection.setRequestProperty("Cache-Control", "max-age=0");
         connection.setRequestProperty("Content-Length", "355");
-        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=--testsssssss");
+        connection.setRequestProperty("content-type", "application/x-www-form-urlencoded");
         connection.setRequestProperty("Cookie",cookie);
         connection.setRequestProperty("Host", "10.10.10.151");
         connection.setRequestProperty("Origin", "http://10.10.10.151");
@@ -162,10 +152,8 @@ public class HttpTookitService implements HttpTookitIntf {
         connection.setRequestProperty("Referer", "http://10.10.10.151/zentao/company-effort-custom-date_desc.html");
         connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36");
-
         connection.setDoOutput(true);
         connection.setDoInput(true);
-
         connection.setRequestProperty("Range", "bytes="+"");
         connection.setConnectTimeout(8000);
         connection.setReadTimeout(20000);

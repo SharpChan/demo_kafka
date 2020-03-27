@@ -8,37 +8,37 @@ public class RowEntity {
     /**
      *ID
      */
-    public String  id;
+    private String  id;
     /**
      *日期
      */
-    public String  date;
+    private String  date;
     /**
      *登记人
      */
-    public String  personName;
+    private String  personName;
     /**
      *工作内容
      */
-    public String  jobDescription;
+    private String  jobDescription;
     /**
      *耗时
      */
-    public String  elapsedTime;
+    private String  elapsedTime;
     /**
      *剩余
      */
-    public String  remainingTime;
+    private String  remainingTime;
     /**
      *对象
      */
-    public String  mission;
+    private String  mission;
     /**
      *产品
      */
-    public String  product;
+    private String  product;
     /**
      *项目
      */
-    public String  projectName;
+    private String  projectName;
 }
