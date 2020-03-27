@@ -8,11 +8,9 @@ import com.example.demo.intf.CreateExcelIntf;
 import com.example.demo.intf.HttpTookitIntf;
 import com.example.demo.intf.TableParseIntf;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,12 +57,5 @@ public class JobController {
         return projectEntityList;
     }
 
-
-    @GetMapping("/job.html")
-    public ModelAndView test(){
-        ModelAndView view = new ModelAndView();
-        view.setViewName("/job");
-        return view;
-    }
 
 }
