@@ -36,9 +36,6 @@ public class JobController {
 
     @RequestMapping("/getExcel")
     public  List<ProjectEntity> getExcel(@RequestParam(value = "dateStart")String dateStart,@RequestParam(value = "dateEnd") String dateEnd,@RequestParam(value = "departmentNo") String departmentNo){
-        System.out.println("dateStart:"+dateStart);
-        System.out.println("dateEnd:"+dateEnd);
-        System.out.println("departmentNo:"+departmentNo);
         List<String> list =new ArrayList<String>();
         httpTookitService.logInGetCookie("chengfeng","12345678",list);
         String  aaa = list.get(list.size()-1);
@@ -53,7 +50,6 @@ public class JobController {
         List<ProjectEntity> projectEntityList = createExcelService.formatConverter(rowEntityList);
 
         String jsonString = JSON.toJSONString(projectEntityList);
-        System.out.println("jsonString"+jsonString);
         return projectEntityList;
     }
 

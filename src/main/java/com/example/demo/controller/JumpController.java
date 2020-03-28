@@ -15,7 +15,7 @@ public class JumpController {
         return view;
     }
     */
-    @GetMapping("/job.html")
+    @GetMapping("/job")
     public ModelAndView test(){
         ModelAndView view = new ModelAndView();
         view.setViewName("/job");

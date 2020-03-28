@@ -92,7 +92,6 @@ public class HttpTookitService implements HttpTookitIntf {
             setConnectionParms(connection,cookie);
             //获取请求的FormData
             String str = getFormDataStringBuffer(parameter);
-            System.out.println("str:"+str);
             outputStream = connection.getOutputStream();
             outputStream.write(str.getBytes());
             outputStream.flush();
@@ -208,10 +207,6 @@ public class HttpTookitService implements HttpTookitIntf {
             connection.connect();
             // 获取所有响应头字段
             Map<String, List<String>> map = connection.getHeaderFields();
-            // 遍历所有的响应头字段
-            for (String key : map.keySet()) {
-                System.out.println(key + "--->" + map.get(key));
-            }
             // 定义 BufferedReader输入流来读取URL的响应
             //in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
