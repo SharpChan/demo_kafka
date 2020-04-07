@@ -43,7 +43,7 @@ public class CreateExcelService implements CreateExcelIntf {
          List<RowEntity> rowList = new ArrayList<RowEntity>();//该项目下的条目
          BigDecimal projectHour = new BigDecimal(0);
          for (RowEntity row : rowEntityList) {
-             if(projectName.equals(row.getProjectName())){
+             if(projectName.equals(row.getProjectName()) && !row.getJobDescription().contains("完成了任务")){
                  personNameSet.add(row.getPersonName());
                  rowList.add(row);
                  projectHour = projectHour.add(new BigDecimal(row.getElapsedTime()));

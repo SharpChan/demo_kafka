@@ -53,4 +53,13 @@ class DemoApplicationTests {
 		System.out.println(ProjectEntityList);
 	}
 
+	@Test
+	public void oldRunable() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println("The old runable now is using!");
+			}
+		}).start();
+	}
 }
